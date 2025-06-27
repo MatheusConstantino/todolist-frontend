@@ -183,12 +183,11 @@ const validatePasswordConfirmationField = () => {
 }
 
 const handleSubmit = async () => {
-  // Limpar erros e mensagens anteriores
   userStore.clearError()
   clearAllErrors()
   successMessage.value = ''
   
-  // Validar todos os campos
+
   validateName()
   validateEmailField()
   validatePasswordField()
@@ -201,11 +200,11 @@ const handleSubmit = async () => {
   const result = await userStore.register(form)
   
   if (result.success) {
-    // Agora podemos acessar o nome do usuário com segurança
+
     const userName = result.user?.name || 'Usuário'
     successMessage.value = `Bem-vindo(a), ${userName}! Redirecionando...`
     
-    // Aguardar um pouco para mostrar a mensagem e depois redirecionar
+
     setTimeout(() => {
       router.push('/login')
     }, 1500)

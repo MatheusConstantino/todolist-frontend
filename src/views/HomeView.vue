@@ -97,7 +97,7 @@ import TodoList from '@/components/TodoList.vue'
 const router = useRouter()
 const userStore = useUserStore()
 
-// Controle para atualizar a lista de todos
+
 const refreshTrigger = ref(0)
 
 const handleLogout = () => {
@@ -106,7 +106,6 @@ const handleLogout = () => {
 }
 
 const handleTodoCreated = (newTodo) => {
-  // Incrementar o trigger para forçar atualização da lista
   refreshTrigger.value++
 }
 

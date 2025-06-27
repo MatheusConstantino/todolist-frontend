@@ -11,6 +11,5 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-// Inicializar autenticação após montar a app
 app.mount('#app')
 setupRouterGuards(router)

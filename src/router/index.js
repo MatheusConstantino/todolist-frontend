@@ -35,7 +35,6 @@ export const setupRouterGuards = (router) => {
     const authStore = await import('@/stores/user')
     const userStore = authStore.useUserStore()
     
-    // Verificar autenticação para rotas protegidas
     if (to.meta.requiresAuth) {
       await userStore.initializeAuth()
       if (!userStore.isAuthenticated) {
@@ -46,7 +45,6 @@ export const setupRouterGuards = (router) => {
       }
     }
     
-    // Redirecionar usuários autenticados que tentam acessar login/register
     if (to.meta.requiresGuest && userStore.isAuthenticated) {
       return next({ name: 'home' })
     }

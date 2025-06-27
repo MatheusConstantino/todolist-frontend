@@ -5,7 +5,7 @@ import { authService } from '@/services/authService'
 export const useUserStore = defineStore('user', () => {
   const user = ref(null)
   const token = ref(null)
-  const loading = ref(true) // Começar com loading true para evitar piscar
+  const loading = ref(true) 
   const error = ref(null)
   const isAuthenticated = ref(false)
 
@@ -23,7 +23,6 @@ const initializeAuth = async () => {
     }
   }
   
-  // Sempre definir loading como false no final
   loading.value = false
 }
 
@@ -34,7 +33,6 @@ const loginUser = async (email, password) => {
   try {
     const data = await authService.login(email, password)
 
-    // Armazenar o token e os dados do usuário
     token.value = data.data.token
     localStorage.setItem('auth_token', data.data.token)
     user.value = data.data.user
@@ -51,7 +49,7 @@ const loginUser = async (email, password) => {
   }
 }
 
-  // Buscar dados do usuário usando a rota /me
+  // Buscar dados do usuário 
   const fetchUserData = async () => {
     if (!token.value) {
       return { success: false, error: 'Token não encontrado' }
@@ -60,7 +58,6 @@ const loginUser = async (email, password) => {
     try {
       const responseData = await authService.getCurrentUser(token.value)
       
-      // A resposta vem com { data: { id, name, email, ... } }
       user.value = responseData.data
       isAuthenticated.value = true
       return { success: true, user: responseData.data }
@@ -83,15 +80,12 @@ const loginUser = async (email, password) => {
       token.value = data.token
       localStorage.setItem('auth_token', data.token)
 
-      // Buscar dados do usuário usando /me
+      // Buscar dados do usuário 
       const userResult = await fetchUserData()
 
-      // Garantir que userResult sempre tenha uma estrutura válida
       if (userResult && userResult.success) {
         return { success: true, data, user: userResult.user }
       } else {
-        // Mesmo se falhar ao buscar /me, o registro foi bem-sucedido
-        // Vamos usar os dados que vieram do registro
         user.value = data.user
         isAuthenticated.value = true
         return { success: true, data, user: data.user }
@@ -99,7 +93,6 @@ const loginUser = async (email, password) => {
 
     } catch (err) {
       error.value = err.message
-      // Limpar token se houver erro
       token.value = null
       localStorage.removeItem('auth_token')
       return { success: false, error: err.message }

@@ -129,7 +129,7 @@ const userStore = useUserStore()
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
-const isExpanded = ref(false) // Estado do accordion
+const isExpanded = ref(false) 
 
 const form = reactive({
   title: '',
@@ -174,7 +174,6 @@ const submitTodo = async () => {
     success.value = 'Tarefa criada com sucesso!'
     emit('todo-created', response.data)
     
-    // Limpar o formulário após sucesso e fechar accordion
     setTimeout(() => {
       resetForm()
       isExpanded.value = false

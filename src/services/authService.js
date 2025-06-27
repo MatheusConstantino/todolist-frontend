@@ -60,7 +60,7 @@ export const authService = {
     return data
   },
 
-  // Logout (se houver endpoint específico)
+  // Logout 
   async logout(token) {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
@@ -71,10 +71,8 @@ export const authService = {
         }
       })
 
-      // Mesmo se falhar, consideramos logout bem-sucedido localmente
       return true
     } catch (error) {
-      // Se não houver endpoint de logout ou falhar, ainda fazemos logout local
       return true
     }
   }

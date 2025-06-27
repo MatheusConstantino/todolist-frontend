@@ -247,7 +247,7 @@ const loadTodos = async () => {
 const markAsCompleted = async (todoId) => {
   try {
     await todoService.updateTodo(todoId, { status: 'completed' }, userStore.token)
-    await loadTodos() // Recarregar a lista
+    await loadTodos() 
   } catch (err) {
     error.value = err.message || 'Erro ao marcar tarefa como concluída'
   }
@@ -260,7 +260,7 @@ const deleteTodo = async (todoId) => {
 
   try {
     await todoService.deleteTodo(todoId, userStore.token)
-    await loadTodos() // Recarregar a lista
+    await loadTodos() 
   } catch (err) {
     error.value = err.message || 'Erro ao excluir tarefa'
   }
@@ -323,17 +323,14 @@ const formatDate = (dateString) => {
   })
 }
 
-// Carregar todos na montagem do componente
 onMounted(() => {
   loadTodos()
 })
 
-// Recarregar quando refreshTrigger mudar
 watch(() => props.refreshTrigger, () => {
   loadTodos()
 })
 
-// Expor função para recarregar externamente
 defineExpose({
   loadTodos
 })
