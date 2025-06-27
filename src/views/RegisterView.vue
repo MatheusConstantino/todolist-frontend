@@ -207,7 +207,7 @@ const handleSubmit = async () => {
     
     // Aguardar um pouco para mostrar a mensagem e depois redirecionar
     setTimeout(() => {
-      router.push('/')
+      router.push('/login')
     }, 1500)
   }
 }

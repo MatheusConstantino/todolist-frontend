@@ -53,16 +53,6 @@
                 Bem-vindo ao seu Todo List!
               </h2>
               
-              <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Informações do Usuário</h3>
-                <div class="space-y-2 text-sm text-gray-600">
-                  <p><strong>ID:</strong> {{ userStore.user.id }}</p>
-                  <p><strong>Nome:</strong> {{ userStore.user.name }}</p>
-                  <p><strong>Email:</strong> {{ userStore.user.email }}</p>
-                  <p><strong>Cadastrado em:</strong> {{ formatDate(userStore.user.created_at) }}</p>
-                  <p><strong>Token:</strong> {{ userStore.token.substring(0, 20) }}...</p>
-                </div>
-              </div>
               
               <div class="border-4 border-dashed border-gray-200 rounded-lg h-64 flex items-center justify-center">
                 <div class="text-center">

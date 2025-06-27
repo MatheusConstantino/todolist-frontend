@@ -11,13 +11,50 @@ export const useUserStore = defineStore('user', () => {
   // Verificar se já existe token salvo ao inicializar
   const initializeAuth = async () => {
     const savedToken = localStorage.getItem('auth_token')
-    
+
     if (savedToken) {
       token.value = savedToken
       // Buscar dados do usuário usando o token
       await fetchUserData()
     }
   }
+
+  const loginUser = async (email, password) => {
+  loading.value = true
+  error.value = null
+
+  try {
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Erro ao fazer login')
+    }
+
+    // Armazenar token e dados do usuário
+    token.value = data.data.token
+    localStorage.setItem('auth_token', data.data.token)
+    user.value = data.data.user
+    isAuthenticated.value = true
+
+    return { success: true, user: data.data.user }
+
+  } catch (err) {
+    error.value = err.message
+    logout() // Limpa os dados em caso de erro
+    return { success: false, error: err.message }
+  } finally {
+    loading.value = false
+  }
+}
 
   // Buscar dados do usuário usando a rota /me
   const fetchUserData = async () => {
@@ -78,7 +115,7 @@ export const useUserStore = defineStore('user', () => {
 
       // Buscar dados do usuário usando /me
       const userResult = await fetchUserData()
-      
+
       // Garantir que userResult sempre tenha uma estrutura válida
       if (userResult && userResult.success) {
         return { success: true, data, user: userResult.user }
@@ -118,6 +155,7 @@ export const useUserStore = defineStore('user', () => {
     loading,
     error,
     isAuthenticated,
+    loginUser,
     register,
     logout,
     clearError,

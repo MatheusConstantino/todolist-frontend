@@ -5,5 +5,12 @@
 </template>
 
 <script setup>
-// App principal agora só renderiza as rotas
+import { onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+onMounted(() => {
+  userStore.initializeAuth()
+})
 </script>
