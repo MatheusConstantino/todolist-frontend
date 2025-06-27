@@ -3,66 +3,60 @@ import { ref, computed } from 'vue'
 export function useValidation() {
   const errors = ref({})
 
+  const validateRequired = (value, fieldName) => {
+    if (!value || value.trim() === '') {
+      return `${fieldName} é obrigatório`
+    }
+    return null
+  }
+
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
+    if (!emailRegex.test(email)) {
+      return 'Email deve ter um formato válido'
+    }
+    return null
   }
 
   const validatePassword = (password) => {
-    return password && password.length >= 6
-  }
-
-  const validateRequired = (value) => {
-    return value && value.trim().length > 0
-  }
-
-  const validateForm = (formData, rules) => {
-    errors.value = {}
-    let isValid = true
-
-    for (const [field, fieldRules] of Object.entries(rules)) {
-      const value = formData[field]
-
-      for (const rule of fieldRules) {
-        if (rule.type === 'required' && !validateRequired(value)) {
-          errors.value[field] = rule.message
-          isValid = false
-          break
-        }
-
-        if (rule.type === 'email' && value && !validateEmail(value)) {
-          errors.value[field] = rule.message
-          isValid = false
-          break
-        }
-
-        if (rule.type === 'password' && value && !validatePassword(value)) {
-          errors.value[field] = rule.message
-          isValid = false
-          break
-        }
-
-        if (rule.type === 'confirm' && value !== formData[rule.field]) {
-          errors.value[field] = rule.message
-          isValid = false
-          break
-        }
-      }
+    if (password.length < 8) {
+      return 'Senha deve ter pelo menos 8 caracteres'
     }
-
-    return isValid
+    return null
   }
 
-  const clearErrors = () => {
+  const validatePasswordConfirmation = (password, confirmation) => {
+    if (password !== confirmation) {
+      return 'Confirmação de senha não confere'
+    }
+    return null
+  }
+
+  const setError = (field, message) => {
+    errors.value[field] = message
+  }
+
+  const clearError = (field) => {
+    delete errors.value[field]
+  }
+
+  const clearAllErrors = () => {
     errors.value = {}
   }
 
-  const hasErrors = computed(() => Object.keys(errors.value).length > 0)
+  const hasErrors = computed(() => {
+    return Object.keys(errors.value).length > 0
+  })
 
   return {
     errors,
-    validateForm,
-    clearErrors,
-    hasErrors
+    hasErrors,
+    validateRequired,
+    validateEmail,
+    validatePassword,
+    validatePasswordConfirmation,
+    setError,
+    clearError,
+    clearAllErrors
   }
 }

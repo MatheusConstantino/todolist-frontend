@@ -53,44 +53,61 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { useValidation } from '@/composables/useValidation'
 import BaseInput from '@/components/BaseInput.vue'
 import BaseButton from '@/components/BaseButton.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
-const { errors, validateForm, clearErrors } = useValidation()
+const errors = ref({})
 
 const form = reactive({
   email: '',
   password: ''
 })
 
-const validationRules = {
-  email: [
-    { type: 'required', message: 'Email é obrigatório' },
-    { type: 'email', message: 'Email deve ter um formato válido' }
-  ],
-  password: [
-    { type: 'required', message: 'Senha é obrigatória' }
-  ]
+const clearErrors = () => {
+  errors.value = {}
+}
+
+const validateForm = () => {
+  clearErrors()
+  let isValid = true
+  
+  if (!form.email) {
+    errors.value.email = 'Email é obrigatório'
+    isValid = false
+  } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+    errors.value.email = 'Email deve ter um formato válido'
+    isValid = false
+  }
+  
+  if (!form.password) {
+    errors.value.password = 'Senha é obrigatória'
+    isValid = false
+  }
+  
+  return isValid
 }
 
 const handleSubmit = async () => {
-  clearErrors()
   userStore.clearError()
 
-  if (!validateForm(form, validationRules)) {
+  if (!validateForm()) {
     return
   }
 
-  const result = await userStore.loginUser(form.email, form.password)
-
-  if (result.success) {
-    router.push('/dashboard')
+  try {
+    const result = await userStore.loginUser(form.email, form.password)
+    
+    if (result.success) {
+      const redirectPath = router.currentRoute.value.query.redirect || '/'
+      router.push(redirectPath)
+    }
+  } catch (error) {
+    console.error('Login error:', error)
   }
 }
 </script>
