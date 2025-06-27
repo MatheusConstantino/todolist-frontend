@@ -13,7 +13,4 @@ app.use(router)
 
 // Inicializar autenticação após montar a app
 app.mount('#app')
-
-// Inicializar dados do usuário se houver token salvo
-const userStore = useUserStore()
-userStore.initializeAuth()
+setupRouterGuards(router)

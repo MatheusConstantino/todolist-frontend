@@ -9,17 +9,21 @@ export const useUserStore = defineStore('user', () => {
   const isAuthenticated = ref(false)
 
   // Verificar se já existe token salvo ao inicializar
-  const initializeAuth = async () => {
-    const savedToken = localStorage.getItem('auth_token')
-
-    if (savedToken) {
-      token.value = savedToken
-      // Buscar dados do usuário usando o token
+const initializeAuth = async () => {
+  const savedToken = localStorage.getItem('auth_token')
+  
+  if (savedToken) {
+    token.value = savedToken
+    try {
       await fetchUserData()
+    } catch (error) {
+      console.error('Failed to fetch user data:', error)
+      logout()
     }
   }
+}
 
-  const loginUser = async (email, password) => {
+const loginUser = async (email, password) => {
   loading.value = true
   error.value = null
 
@@ -39,7 +43,7 @@ export const useUserStore = defineStore('user', () => {
       throw new Error(data.message || 'Erro ao fazer login')
     }
 
-    // Armazenar token e dados do usuário
+    // Armazene o token e os dados corretamente
     token.value = data.data.token
     localStorage.setItem('auth_token', data.data.token)
     user.value = data.data.user
@@ -49,7 +53,7 @@ export const useUserStore = defineStore('user', () => {
 
   } catch (err) {
     error.value = err.message
-    logout() // Limpa os dados em caso de erro
+    logout()
     return { success: false, error: err.message }
   } finally {
     loading.value = false
@@ -63,7 +67,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/me', {
+      const response = await fetch('http://localhost:8000/api/auth/me', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

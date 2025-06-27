@@ -1,7 +1,5 @@
 <template>
-  <div id="app">
-    <router-view />
-  </div>
+  <router-view />
 </template>
 
 <script setup>
@@ -10,7 +8,7 @@ import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 
-onMounted(() => {
-  userStore.initializeAuth()
+onMounted(async () => {
+  await userStore.initializeAuth()
 })
 </script>
