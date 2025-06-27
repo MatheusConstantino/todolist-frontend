@@ -3,8 +3,54 @@ import { ref } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref(null)
+  const token = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  const isAuthenticated = ref(false)
+
+  // Verificar se já existe token salvo ao inicializar
+  const initializeAuth = async () => {
+    const savedToken = localStorage.getItem('auth_token')
+    
+    if (savedToken) {
+      token.value = savedToken
+      // Buscar dados do usuário usando o token
+      await fetchUserData()
+    }
+  }
+
+  // Buscar dados do usuário usando a rota /me
+  const fetchUserData = async () => {
+    if (!token.value) {
+      return { success: false, error: 'Token não encontrado' }
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/api/me', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token.value}`
+        }
+      })
+
+      if (response.ok) {
+        const responseData = await response.json()
+        // A resposta vem com { data: { id, name, email, ... } }
+        user.value = responseData.data
+        isAuthenticated.value = true
+        return { success: true, user: responseData.data }
+      } else {
+        // Token inválido, limpar dados
+        logout()
+        return { success: false, error: 'Token inválido' }
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados do usuário:', err)
+      logout()
+      return { success: false, error: err.message }
+    }
+  }
 
   const register = async (userData) => {
     loading.value = true
@@ -26,20 +72,40 @@ export const useUserStore = defineStore('user', () => {
         throw new Error(data.message || 'Erro ao cadastrar usuário')
       }
 
-      user.value = data.user
+      // Salvar apenas o token
+      token.value = data.token
+      localStorage.setItem('auth_token', data.token)
+
+      // Buscar dados do usuário usando /me
+      const userResult = await fetchUserData()
       
-      // Se a API retornar token, salvar no localStorage
-      if (data.token) {
-        localStorage.setItem('auth_token', data.token)
+      // Garantir que userResult sempre tenha uma estrutura válida
+      if (userResult && userResult.success) {
+        return { success: true, data, user: userResult.user }
+      } else {
+        // Mesmo se falhar ao buscar /me, o registro foi bem-sucedido
+        // Vamos usar os dados que vieram do registro
+        user.value = data.user
+        isAuthenticated.value = true
+        return { success: true, data, user: data.user }
       }
 
-      return { success: true, data }
     } catch (err) {
       error.value = err.message
+      // Limpar token se houver erro
+      token.value = null
+      localStorage.removeItem('auth_token')
       return { success: false, error: err.message }
     } finally {
       loading.value = false
     }
+  }
+
+  const logout = () => {
+    user.value = null
+    token.value = null
+    isAuthenticated.value = false
+    localStorage.removeItem('auth_token')
   }
 
   const clearError = () => {
@@ -48,9 +114,14 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     user,
+    token,
     loading,
     error,
+    isAuthenticated,
     register,
-    clearError
+    logout,
+    clearError,
+    initializeAuth,
+    fetchUserData
   }
 })

@@ -17,8 +17,20 @@
       </div>
 
       <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-        <div v-if="userStore.error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {{ userStore.error }}
+        <div v-if="userStore.error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+          <span class="block sm:inline">{{ userStore.error }}</span>
+          <button 
+            type="button"
+            class="absolute top-0 bottom-0 right-0 px-4 py-3"
+            @click="userStore.clearError"
+          >
+            <span class="sr-only">Fechar</span>
+            ×
+          </button>
+        </div>
+
+        <div v-if="successMessage" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+          {{ successMessage }}
         </div>
 
         <BaseInput
@@ -78,7 +90,7 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useValidation } from '@/composables/useValidation'
@@ -87,6 +99,8 @@ import BaseButton from '@/components/BaseButton.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const successMessage = ref('')
+
 const { 
   errors, 
   hasErrors, 
@@ -169,9 +183,10 @@ const validatePasswordConfirmationField = () => {
 }
 
 const handleSubmit = async () => {
-  // Limpar erros anteriores
+  // Limpar erros e mensagens anteriores
   userStore.clearError()
   clearAllErrors()
+  successMessage.value = ''
   
   // Validar todos os campos
   validateName()
@@ -186,8 +201,14 @@ const handleSubmit = async () => {
   const result = await userStore.register(form)
   
   if (result.success) {
-    // Redirecionar para dashboard ou página inicial
-    router.push('/')
+    // Agora podemos acessar o nome do usuário com segurança
+    const userName = result.user?.name || 'Usuário'
+    successMessage.value = `Bem-vindo(a), ${userName}! Redirecionando...`
+    
+    // Aguardar um pouco para mostrar a mensagem e depois redirecionar
+    setTimeout(() => {
+      router.push('/')
+    }, 1500)
   }
 }
 </script>
