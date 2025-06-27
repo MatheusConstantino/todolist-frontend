@@ -1,9 +1,72 @@
 <template>
   <div class="bg-white rounded-lg shadow-md">
     <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">
-        Suas Tarefas
-      </h3>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Suas Tarefas
+        </h3>
+        <button
+          @click="showFilters = !showFilters"
+          class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {{ showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div v-show="showFilters" class="border-t border-gray-200 pt-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Filtro por Status -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              v-model="filters.status"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todos</option>
+              <option value="pending">Pendentes</option>
+              <option value="completed">Concluídas</option>
+            </select>
+          </div>
+
+          <!-- Filtro por Prioridade -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
+            <select
+              v-model="filters.priority"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todas</option>
+              <option value="low">Baixa</option>
+              <option value="medium">Média</option>
+              <option value="high">Alta</option>
+            </select>
+          </div>
+
+          <!-- Filtro por Prazo -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Prazo</label>
+            <select
+              v-model="filters.overdue"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Todas</option>
+              <option value="true">Atrasadas</option>
+              <option value="false">No Prazo</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botão Limpar Filtros -->
+        <div class="mt-4 flex justify-end">
+          <button
+            @click="clearFilters"
+            class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Loading state -->
@@ -20,17 +83,21 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="!todos.length" class="p-6 text-center">
+    <div v-else-if="!filteredTodos.length" class="p-6 text-center">
       <div class="text-gray-500">
-        <p class="text-lg font-medium mb-2">Nenhuma tarefa encontrada</p>
-        <p class="text-sm">Crie sua primeira tarefa usando o formulário acima!</p>
+        <p class="text-lg font-medium mb-2">
+          {{ hasActiveFilters ? 'Nenhuma tarefa encontrada com os filtros aplicados' : 'Nenhuma tarefa encontrada' }}
+        </p>
+        <p class="text-sm">
+          {{ hasActiveFilters ? 'Tente ajustar os filtros ou limpar para ver todas as tarefas.' : 'Crie sua primeira tarefa usando o formulário acima!' }}
+        </p>
       </div>
     </div>
 
     <!-- Todo list -->
     <div v-else class="divide-y divide-gray-200">
       <div
-        v-for="todo in todos"
+        v-for="todo in filteredTodos"
         :key="todo.id"
         class="p-6 hover:bg-gray-50 transition-colors"
       >
@@ -94,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { todoService } from '@/services/todoService'
 import { useUserStore } from '@/stores/user'
 
@@ -109,6 +176,53 @@ const userStore = useUserStore()
 const todos = ref([])
 const loading = ref(false)
 const error = ref('')
+const showFilters = ref(false)
+
+// Filtros reativos
+const filters = reactive({
+  status: '',
+  priority: '',
+  overdue: ''
+})
+
+// Computed para tarefas filtradas
+const filteredTodos = computed(() => {
+  let filtered = todos.value
+
+  // Filtro por status
+  if (filters.status) {
+    if (filters.status === 'completed') {
+      filtered = filtered.filter(todo => todo.is_completed)
+    } else if (filters.status === 'pending') {
+      filtered = filtered.filter(todo => !todo.is_completed)
+    }
+  }
+
+  // Filtro por prioridade
+  if (filters.priority) {
+    filtered = filtered.filter(todo => todo.priority === filters.priority)
+  }
+
+  // Filtro por prazo
+  if (filters.overdue !== '') {
+    const isOverdue = filters.overdue === 'true'
+    filtered = filtered.filter(todo => todo.is_overdue === isOverdue)
+  }
+
+  return filtered
+})
+
+// Computed para verificar se há filtros ativos
+const hasActiveFilters = computed(() => {
+  return filters.status !== '' || filters.priority !== '' || filters.overdue !== ''
+})
+
+// Função para limpar filtros
+const clearFilters = () => {
+  filters.status = ''
+  filters.priority = ''
+  filters.overdue = ''
+}
 
 const loadTodos = async () => {
   if (!userStore.token) {
@@ -215,7 +329,6 @@ onMounted(() => {
 })
 
 // Recarregar quando refreshTrigger mudar
-import { watch } from 'vue'
 watch(() => props.refreshTrigger, () => {
   loadTodos()
 })

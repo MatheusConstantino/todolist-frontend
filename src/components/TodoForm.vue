@@ -1,8 +1,28 @@
 <template>
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">
-      Criar Nova Tarefa
-    </h3>
+  <div class="bg-white rounded-lg shadow-md mb-6">
+    <!-- Header do Accordion -->
+    <div 
+      @click="toggleForm"
+      class="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+    >
+      <h3 class="text-lg font-semibold text-gray-900">
+        Criar Nova Tarefa
+      </h3>
+      <svg 
+        :class="['w-5 h-5 text-gray-500 transition-transform duration-200', { 'rotate-180': isExpanded }]"
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+
+    <!-- Conteúdo do Accordion -->
+    <div 
+      v-show="isExpanded"
+      class="border-t border-gray-200 p-6"
+    >
     
     <form @submit.prevent="submitTodo" class="space-y-4">
       <!-- Título -->
@@ -93,6 +113,8 @@
     <div v-if="success" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
       {{ success }}
     </div>
+    
+    </div> <!-- Fim do conteúdo do accordion -->
   </div>
 </template>
 
@@ -107,6 +129,7 @@ const userStore = useUserStore()
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
+const isExpanded = ref(false) // Estado do accordion
 
 const form = reactive({
   title: '',
@@ -114,6 +137,10 @@ const form = reactive({
   priority: '',
   due_date: ''
 })
+
+const toggleForm = () => {
+  isExpanded.value = !isExpanded.value
+}
 
 const resetForm = () => {
   form.title = ''
@@ -147,9 +174,10 @@ const submitTodo = async () => {
     success.value = 'Tarefa criada com sucesso!'
     emit('todo-created', response.data)
     
-    // Limpar o formulário após sucesso
+    // Limpar o formulário após sucesso e fechar accordion
     setTimeout(() => {
       resetForm()
+      isExpanded.value = false
     }, 1500)
 
   } catch (err) {

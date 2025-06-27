@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { authService } from '@/services/authService'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref(null)
   const token = ref(null)
-  const loading = ref(false)
+  const loading = ref(true) // Começar com loading true para evitar piscar
   const error = ref(null)
   const isAuthenticated = ref(false)
 
@@ -21,6 +22,9 @@ const initializeAuth = async () => {
       logout()
     }
   }
+  
+  // Sempre definir loading como false no final
+  loading.value = false
 }
 
 const loginUser = async (email, password) => {
@@ -28,22 +32,9 @@ const loginUser = async (email, password) => {
   error.value = null
 
   try {
-    const response = await fetch('http://localhost:8000/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    })
+    const data = await authService.login(email, password)
 
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Erro ao fazer login')
-    }
-
-    // Armazene o token e os dados corretamente
+    // Armazenar o token e os dados do usuário
     token.value = data.data.token
     localStorage.setItem('auth_token', data.data.token)
     user.value = data.data.user
@@ -67,25 +58,13 @@ const loginUser = async (email, password) => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/me', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token.value}`
-        }
-      })
-
-      if (response.ok) {
-        const responseData = await response.json()
-        // A resposta vem com { data: { id, name, email, ... } }
-        user.value = responseData.data
-        isAuthenticated.value = true
-        return { success: true, user: responseData.data }
-      } else {
-        // Token inválido, limpar dados
-        logout()
-        return { success: false, error: 'Token inválido' }
-      }
+      const responseData = await authService.getCurrentUser(token.value)
+      
+      // A resposta vem com { data: { id, name, email, ... } }
+      user.value = responseData.data
+      isAuthenticated.value = true
+      return { success: true, user: responseData.data }
+      
     } catch (err) {
       console.error('Erro ao buscar dados do usuário:', err)
       logout()
@@ -98,22 +77,9 @@ const loginUser = async (email, password) => {
     error.value = null
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-      })
+      const data = await authService.register(userData)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erro ao cadastrar usuário')
-      }
-
-      // Salvar apenas o token
+      // Salvar o token
       token.value = data.token
       localStorage.setItem('auth_token', data.token)
 
