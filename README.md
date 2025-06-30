@@ -94,7 +94,7 @@ src/
 
 1. **Clone o repositório**
 ```bash
-git clone [https://github.com/seu-usuario/todo-list-vue3.git](https://github.com/MatheusConstantino/todolist-frontend.git)
+git clone https://github.com/MatheusConstantino/todolist-frontend.git
 cd todo-list-vue3
 ```
 
