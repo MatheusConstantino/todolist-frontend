@@ -95,7 +95,7 @@ src/
 1. **Clone o repositório**
 ```bash
 git clone https://github.com/MatheusConstantino/todolist-frontend.git
-cd todo-list-vue3
+cd todolist-frontend
 ```
 
 2. **Instale as dependências**
