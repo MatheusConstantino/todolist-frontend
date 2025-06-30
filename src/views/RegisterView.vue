@@ -202,7 +202,7 @@ const handleSubmit = async () => {
   if (result.success) {
 
     const userName = result.user?.name || 'Usuário'
-    successMessage.value = `Bem-vindo(a), ${userName}! Redirecionando...`
+    successMessage.value = `Cadastro feito com sucesso! Redirecionando...`
     
 
     setTimeout(() => {
