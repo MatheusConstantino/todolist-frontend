@@ -209,8 +209,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 👨‍💻 Desenvolvedor
 
 **Matheus Constantino**
-- GitHub: [@MatheusConstantino](https://github.com/MatheusConstantino)
-- LinkedIn: [Matheus Constantino](https://linkedin.com/in/matheus-constantino-gomes)
+- GitHub: [@MateusConstantino](https://github.com/MatheusConstantino)
+- LinkedIn: [Matheus Constantino Gomes](https://linkedin.com/in/matheus-constantino-gomes)
 - Email: matheusconstantino57@gmail.com
 
 ## 🔗 Repositórios Relacionados
